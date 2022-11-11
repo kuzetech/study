@@ -13,7 +13,8 @@ func Test_openDB(t *testing.T) {
 			//openDB()
 			//printAllKeys()
 			//keyNotExist()
-			keyExist()
+			//keyExist()
+			printKeys()
 		})
 	}
 }

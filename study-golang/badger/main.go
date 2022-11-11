@@ -160,3 +160,22 @@ func keyExist() {
 
 	log.Panic("出现意外的错误")
 }
+
+func printKeys() {
+	db, _ := badger.Open(badger.DefaultOptions("/Users/huangsw/code/lab/lab-sausage-log-simulator/badger"))
+
+	db.View(func(txn *badger.Txn) error {
+		item, _ := txn.Get([]byte("Record-/Users/huangsw/code/lab/lab-sausage-log-simulator/minute-logs/s10/2022/11/11/16/44.log"))
+		item.Value(func(val []byte) error {
+			fmt.Println(string(val))
+			return nil
+		})
+		item2, _ := txn.Get([]byte("Record-/Users/huangsw/code/lab/lab-sausage-log-simulator/minute-logs/s41/2022/11/11/16/40.log"))
+		item2.Value(func(val []byte) error {
+			fmt.Println(string(val))
+			return nil
+		})
+		return nil
+	})
+
+}
