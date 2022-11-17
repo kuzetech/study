@@ -1,8 +1,8 @@
 package main
 
-import "techkuze.com/bigdata/study/study-golang/array"
+import "fmt"
 
 func main() {
-	array.Test2()
-
+	var test map[string]struct{} = nil
+	fmt.Println(len(test))
 }
