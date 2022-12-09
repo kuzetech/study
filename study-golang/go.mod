@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/avast/retry-go/v4 v4.3.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
