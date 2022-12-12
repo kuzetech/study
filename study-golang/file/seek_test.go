@@ -1,4 +1,4 @@
-package fileSeek
+package file
 
 import (
 	"bufio"
@@ -7,10 +7,11 @@ import (
 	"log"
 	"os"
 	"strings"
+	"testing"
 )
 
-func test() {
-	var filePath = "./test"
+func Test_seek(t *testing.T) {
+	var filePath = "./files/seek.txt"
 
 	file, _ := os.Create(filePath)
 	defer file.Close()
@@ -27,6 +28,8 @@ func test() {
 	//state, _ := os.Stat(filePath)
 	//var fileSize = state.Size()
 
+	// 0 表示从文件头部开始
+	// 4 表示移动到第四个字节
 	_, err := file.Seek(4, 0)
 	if err != nil {
 		log.Fatal(err)
