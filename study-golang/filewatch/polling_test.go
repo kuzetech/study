@@ -1,14 +1,15 @@
-package pollingWatcher
+package filewatch
 
 import (
 	"fmt"
 	"github.com/radovskyb/watcher"
 	"log"
 	"regexp"
+	"testing"
 	"time"
 )
 
-func test() {
+func Test_polling(t *testing.T) {
 	w := watcher.New()
 
 	// SetMaxEvents to 1 to allow at most 1 event's to be received

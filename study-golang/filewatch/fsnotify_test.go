@@ -1,11 +1,12 @@
-package fsnotify
+package filewatch
 
 import (
 	"github.com/fsnotify/fsnotify"
 	"log"
+	"testing"
 )
 
-func test() {
+func Test_fsnotify(t *testing.T) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)

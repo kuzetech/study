@@ -9,7 +9,7 @@ import (
 var b = flag.Bool("b", false, "bool类型参数")
 var s = flag.String("s", "", "string类型参数")
 
-func Test_test(t *testing.T) {
+func Test_flag(t *testing.T) {
 	// os.Args 除了包含传入的参数，还有其他的
 	/*for idx, args := range os.Args {
 		fmt.Println("参数"+strconv.Itoa(idx)+":", args)

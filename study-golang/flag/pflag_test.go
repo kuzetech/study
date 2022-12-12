@@ -6,7 +6,7 @@ import (
 )
 import flag "github.com/spf13/pflag"
 
-func Test_main(t *testing.T) {
+func Test_pflag(t *testing.T) {
 
 	// pflag是Go的flag包的直接替代，如果您在名称“ flag”下导入pflag (如：import flag "github.com/spf13/pflag")，则所有代码应继续运行且无需更改。
 	// pflag 包与 flag 包的工作原理甚至是代码实现都是类似的，下面是 pflag 相对 flag 的一些优势：

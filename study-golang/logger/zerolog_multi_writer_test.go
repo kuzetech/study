@@ -1,14 +1,14 @@
-package multiWriterLog
+package logger
 
 import (
 	"fmt"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/rs/zerolog"
+	log "github.com/rs/zerolog/log"
 	"os"
 	"strings"
+	"testing"
 	"time"
-
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	zerolog "github.com/rs/zerolog"
-	log "github.com/rs/zerolog/log"
 )
 
 const (
@@ -64,4 +64,14 @@ func init() {
 
 	multi := zerolog.MultiLevelWriter(consoleWriter, fileWriter)
 	Logger = zerolog.New(multi).With().Timestamp().Caller().Logger()
+}
+
+func Test_multi_writer(t *testing.T) {
+	ticker := time.NewTicker(3 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			Logger.Info().Msg("1111111")
+		}
+	}
 }

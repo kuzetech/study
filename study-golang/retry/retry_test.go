@@ -5,12 +5,12 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"testing"
 	"time"
 )
 
-func test_retry() {
-
-	var fc = func() error {
+func Test_retry(t *testing.T) {
+	var retryFunc = func() error {
 		_, err := http.Get("http://asdasd")
 		if err != nil {
 			return err
@@ -34,15 +34,16 @@ func test_retry() {
 	}
 
 	err := retry.Do(
-		fc,
-		retry.Delay(time.Second*3),
-		retry.MaxDelay(time.Second*3),
-		retry.Attempts(3),
-		retry.OnRetry(callback),
-		retry.RetryIf(retryIf),
+		retryFunc,
+		retry.Delay(time.Second*3),    // 3秒后重试
+		retry.MaxDelay(time.Second*3), // 虽然指定了 delay 但是可能会超时，需要指定 MaxDelay
+		retry.Attempts(3),             // 指定重试次数
+		retry.OnRetry(callback),       // 每次重试的回调
+		retry.RetryIf(retryIf),        // 触发重试的条件
 	)
 
 	if err != nil {
+		// 错误中包涵每一次重试的结果
 		log.Println(err)
 	}
 }
