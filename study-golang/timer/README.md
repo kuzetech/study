@@ -8,7 +8,7 @@ go 中的定时器一共分为三种，timer、ticker、time.after
 
 ### ticker
 
-无需重置，定时触发。但是如果不用了需要调用 close 方法关闭。
+无需重置，定时触发。但是如果不用了需要调用 Stop 方法关闭。
 
 ### time.after
 
