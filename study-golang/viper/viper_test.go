@@ -3,6 +3,7 @@ package viper
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"strings"
 	"testing"
 )
 import "github.com/spf13/viper"
@@ -13,6 +14,7 @@ func Test_viper(t *testing.T) {
 	// 查找名为 test.yaml 的配置文件
 	v.SetConfigName("test")
 	v.SetConfigType("yaml")
+	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 
 	// 在多个目录下查找 test.yaml 的配置文件
 	// 多个路径的情况下，读取找到的第一个文件
