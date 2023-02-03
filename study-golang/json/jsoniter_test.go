@@ -19,6 +19,7 @@ var test = Test{
 }
 
 func TestArrayFieldOrder(t *testing.T) {
+	// json 序列化必须保证 数组的顺序
 	data, _ := jsoniter.ConfigFastest.Marshal(test)
 
 	for i := 0; i < 100; i++ {
@@ -32,4 +33,37 @@ func TestArrayFieldOrder(t *testing.T) {
 		}
 		fmt.Println()
 	}
+}
+
+type Message struct {
+	Time  int64 `name:"time" json:"time"`
+	Count int64 `name:"count" json:"count"`
+}
+
+func TestBigIntDecode(t *testing.T) {
+
+	content := "{\"time\": 1675404945109,\"count\": 1621071533109678080}"
+
+	var result = Message{}
+	jsoniter.ConfigFastest.Unmarshal([]byte(content), &result)
+
+	fmt.Println(result)
+
+}
+
+func TestBigIntEncode(t *testing.T) {
+	var msg = Message{
+		Time:  1675404945109,
+		Count: 1621071533109678080,
+	}
+
+	data, err := jsoniter.ConfigFastest.Marshal(msg)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var result = Message{}
+	jsoniter.ConfigFastest.Unmarshal(data, &result)
+
+	fmt.Println(result)
 }
