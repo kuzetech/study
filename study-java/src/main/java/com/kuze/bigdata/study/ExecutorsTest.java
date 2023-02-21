@@ -7,7 +7,8 @@ public class ExecutorsTest {
 
     public static void main(String[] args) {
 
-        ExecutorService service = Executors.newFixedThreadPool(5);
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+
 
     }
 }
