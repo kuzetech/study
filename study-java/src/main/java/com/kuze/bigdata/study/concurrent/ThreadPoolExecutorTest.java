@@ -1,4 +1,4 @@
-package com.kuze.bigdata.study;
+package com.kuze.bigdata.study.concurrent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;

@@ -1,4 +1,4 @@
-package com.kuze.bigdata.study;
+package com.kuze.bigdata.study.treemap;
 
 import java.util.Comparator;
 import java.util.SortedMap;
