@@ -16,7 +16,7 @@ type User struct {
 func (u *User) GetUser(id int, user *User) error {
 	userMap := map[int]User{
 		1: {ID: 1, Name: "frank"},
-		2: {ID: 2, Name: "lucy"},1
+		2: {ID: 2, Name: "lucy"},
 	}
 	if userInfo, ok := userMap[id]; ok {
 		*user = userInfo
