@@ -9,8 +9,8 @@ import (
 )
 
 type Message struct {
-	Name  string `name:"name" json:"name"`
-	Count int64  `name:"count" json:"count"`
+	Name  string  `name:"name" json:"name"`
+	Count float64 `name:"count" json:"count"`
 }
 
 var contentBytes = []byte("{\"name\": \"test\",\"count\": 1621071533109678080123456}")
@@ -60,6 +60,8 @@ func TestBigIntDecodeUseNumberToObject(t *testing.T) {
 		// json.Message.Count: readUint64: overflow, error found in #10 byte of
 		// ...|: 162107153310967808|..., bigger context ...|{"name": "test","count": 1621071533109678080123456}|...
 		t.Log(err)
+	} else {
+		log.Println(msg)
 	}
 }
 
@@ -84,7 +86,7 @@ func TestBigIntDecodeConvertUseNumberToObject(t *testing.T) {
 		Name: name,
 		// 当 float64 的值大于 int64 的值时会造成内存溢出
 		// int64 最大值为 9223372036854775808
-		Count: int64(count),
+		Count: count,
 	}
 
 	// 最终结果 {test -9223372036854775808}
