@@ -27,8 +27,13 @@ func DataType(data interface{}) string {
 	}
 }
 
+type ErrorMessage struct {
+	PropertyPath string
+	Message      string
+}
+
 type Result struct {
-	Massages []string
+	Errors []*ErrorMessage
 }
 
 func validateData(level string, schema map[string]interface{}, data interface{}, r *Result) *Result {
@@ -36,14 +41,14 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 	required := schema["required"].(bool)
 	// log.Printf("当前 level 为 %s ，typeValue 为 %s ，required 为 %v \n", level, typeValue, required)
 	if required && data == nil {
-		r.Massages = append(r.Massages, level+" 是预置属性，不能为空")
+		r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，不能为空"})
 	}
 	if data != nil {
 		switch typeValue {
 		case "object":
 			objectData, ok := data.(map[string]interface{})
 			if !ok {
-				r.Massages = append(r.Massages, level+" 必须是 object 类型")
+				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，不能为空"})
 			} else {
 				propertiesMap := schema["properties"].(map[string]interface{})
 				for filedName, settings := range propertiesMap {
@@ -53,7 +58,7 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 		case "array":
 			objectData, ok := data.([]interface{})
 			if !ok {
-				r.Massages = append(r.Massages, level+" 必须是 array 类型")
+				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
 			} else {
 				itemsMap := schema["items"].(map[string]interface{})
 				if itemsMap["type"] == "object" || itemsMap["type"] == "array" {
@@ -66,7 +71,7 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 			if required {
 				dataType := DataType(data)
 				if dataType != typeValue {
-					r.Massages = append(r.Massages, level+" 是预置属性，期望类型是 "+typeValue+"，实际类型是 "+dataType)
+					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，期望类型是 " + typeValue + "，实际类型是 " + dataType})
 				}
 			}
 		}
@@ -103,7 +108,7 @@ func TestSchemaValidate(t *testing.T) {
 				"required": true,
 				"items": H{
 					"type":     "object",
-					"required": false,
+					"required": true,
 					"properties": H{
 						"#age": H{
 							"type":     "integer",
@@ -147,11 +152,11 @@ func TestSchemaValidate(t *testing.T) {
 	}
 
 	r := Result{
-		Massages: make([]string, 0, 1),
+		Errors: make([]*ErrorMessage, 0, 1),
 	}
 	validateData("", schema, value, &r)
 
-	for _, massage := range r.Massages {
+	for _, massage := range r.Errors {
 		log.Println(massage)
 	}
 
