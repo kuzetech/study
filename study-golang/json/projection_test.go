@@ -5,6 +5,50 @@ import (
 	"testing"
 )
 
+type projector func(interface{}) interface{}
+
+func copyProjector(v interface{}) interface{} {
+	return v
+}
+
+func buildProjector(schema map[string]interface{}) projector {
+	t := schema["type"]
+	switch t {
+	case "object":
+		return buildObjectProjector(schema["properties"].(map[string]interface{}))
+	case "array":
+		return buildArrayProject(schema["items"].(map[string]interface{}))
+	default:
+		return copyProjector
+	}
+}
+
+func buildObjectProjector(properties map[string]interface{}) projector {
+	projectors := map[string]projector{}
+	for field, schema := range properties {
+		projectors[field] = buildProjector(schema.(map[string]interface{}))
+	}
+	return func(v interface{}) interface{} {
+		obj := map[string]interface{}{}
+		for f, p := range projectors {
+			obj[f] = p(v.(map[string]interface{})[f])
+		}
+		return obj
+	}
+}
+
+func buildArrayProject(items map[string]interface{}) projector {
+	p := buildProjector(items)
+	return func(v interface{}) interface{} {
+		vm := v.([]interface{})
+		obj := make([]interface{}, 0, len(vm))
+		for _, val := range vm {
+			obj = append(obj, p(val))
+		}
+		return obj
+	}
+}
+
 type H = map[string]interface{}
 type A = []interface{}
 
@@ -13,33 +57,41 @@ func TestProjection(t *testing.T) {
 	p := buildProjector(H{
 		"type": "object",
 		"properties": H{
-			"a": H{
+			"#id": H{
 				"type": "number",
+				"pre":  true,
 			},
-			"b": H{
+			"#person": H{
 				"type": "object",
+				"pre":  true,
 				"properties": H{
-					"c": H{
+					"age": H{
 						"type": "number",
+						"pre":  false,
 					},
 				},
 			},
-			"d": H{
+			"#friends": H{
 				"type": "array",
+				"pre":  true,
 				"items": H{
 					"type": "object",
 					"properties": H{
-						"e": H{
+						"age": H{
 							"type": "number",
+							"pre":  false,
 						},
-						"f": H{
+						"name": H{
 							"type": "string",
+							"pre":  false,
 						},
 					},
 				},
 			},
-			"f": H{
+			"likes": H{
 				"type": "array",
+				"pre":  false,
+				"drop": true,
 				"items": H{
 					"type": "string",
 				},
@@ -48,35 +100,35 @@ func TestProjection(t *testing.T) {
 	})
 
 	value := map[string]interface{}{
-		"a": 1,
-		"b": H{
-			"c":  1,
-			"c1": 1,
-			"c2": 1,
+		"#id": 1,
+		"#person": H{
+			"age":  1,
+			"age1": 1,
+			"age2": 1,
 		},
-		"d": A{
-			H{"e": 1, "f": "1", "e1": 1},
-			H{"e": 2, "f": "2", "f1": "2"},
+		"#friends": A{
+			H{"age": 1, "name": "1", "other": 1},
+			H{"age": 2, "name": "2", "other": "2"},
 		},
-		"f": A{
+		"likes": A{
 			"a",
 			"b",
 		},
-		"z": 1,
+		"other": 1,
 	}
 
 	result := p(value)
 
 	expected := map[string]interface{}{
-		"a": 1,
-		"b": H{
-			"c": 1,
+		"#id": 1,
+		"#person": H{
+			"age": 1,
 		},
-		"d": A{
-			H{"e": 1, "f": "1"},
-			H{"e": 2, "f": "2"},
+		"#friends": A{
+			H{"age": 1, "name": "1"},
+			H{"age": 2, "name": "2"},
 		},
-		"f": A{
+		"likes": A{
 			"a",
 			"b",
 		},
