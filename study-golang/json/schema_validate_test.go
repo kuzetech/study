@@ -39,14 +39,15 @@ type Result struct {
 func deleteItem(parentData *interface{}, dataFieldName string, dataArrayIndex int) {
 	if dataFieldName == "" {
 		pd := (*parentData).([]interface{})
-		log.Println(pd)
+		pd = append(pd[:dataArrayIndex], pd[dataArrayIndex+1:]...)
+		*parentData = &pd
 	} else {
 		pd := (*parentData).(map[string]interface{})
 		delete(pd, dataFieldName)
 	}
 }
 
-func validateData(level string, schema map[string]interface{}, data interface{}, parentData *interface{}, dataFieldName string, dataArrayIndex int, r *Result) *Result {
+func validateData(level string, schema map[string]interface{}, data interface{}, parentData *interface{}, dataFieldName string, dataArrayIndex int, r *Result) {
 	typeValue := schema["type"].(string)
 	required := schema["required"].(bool)
 	// log.Printf("当前 level 为 %s ，typeValue 为 %s ，required 为 %v \n", level, typeValue, required)
@@ -94,7 +95,6 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 			}
 		}
 	}
-	return r
 }
 
 func TestSchemaValidate(t *testing.T) {
@@ -118,6 +118,10 @@ func TestSchemaValidate(t *testing.T) {
 					"#name": H{
 						"type":     "string",
 						"required": true,
+					},
+					"address": H{
+						"type":     "string",
+						"required": false,
 					},
 				},
 			},
@@ -148,15 +152,32 @@ func TestSchemaValidate(t *testing.T) {
 					"required": false,
 				},
 			},
+			"test": H{
+				"type":     "array",
+				"required": false,
+				"items": H{
+					"type":     "string",
+					"required": false,
+				},
+			},
+			"#test2": H{
+				"type":     "array",
+				"required": true,
+				"items": H{
+					"type":     "string",
+					"required": false,
+				},
+			},
 		},
 	}
 
 	value := map[string]interface{}{
 		"#id": 1,
 		"#person": H{
-			"#age":  1,
-			"#name": "1",
-			"other": 1,
+			"#age":    1,
+			"#name":   "1",
+			"address": 1,
+			"other":   1,
 		},
 		"#friends": A{
 			H{"#age": 1, "name": "1", "other": 1},
@@ -167,16 +188,24 @@ func TestSchemaValidate(t *testing.T) {
 			"b",
 			1,
 		},
+		"test": "a",
+		"#test2": A{
+			"c",
+			"d",
+			1,
+		},
 		"other": 1,
 	}
 
 	r := Result{
 		Errors: make([]*ErrorMessage, 0, 1),
 	}
+
 	validateData("", schema, value, nil, "", 0, &r)
 
 	for _, massage := range r.Errors {
 		log.Println(massage)
 	}
 
+	log.Println(value)
 }
