@@ -125,7 +125,8 @@ func TestSchemaValidate(t *testing.T) {
 				"type":     "array",
 				"required": true,
 				"items": H{
-					"type": "string",
+					"type":     "string",
+					"required": true,
 				},
 			},
 		},
