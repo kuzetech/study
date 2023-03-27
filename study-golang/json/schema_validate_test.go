@@ -114,9 +114,8 @@ func TestSchemaValidate(t *testing.T) {
 							"required": true,
 						},
 						"name": H{
-							"type":            "string",
-							"required":        false,
-							"discard_invalid": true,
+							"type":     "string",
+							"required": false,
 						},
 					},
 				},
@@ -126,7 +125,7 @@ func TestSchemaValidate(t *testing.T) {
 				"required": true,
 				"items": H{
 					"type":     "string",
-					"required": true,
+					"required": false,
 				},
 			},
 		},
