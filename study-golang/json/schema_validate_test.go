@@ -1,11 +1,22 @@
 package json
 
 import (
+	"encoding/json"
+	"github.com/buger/jsonparser"
 	"go/types"
 	"log"
 	"strconv"
+	"strings"
 	"testing"
 )
+
+type TypeDecl struct {
+	Name     string     `json:"name,omitempty"`
+	Type     string     `json:"type"`
+	Required bool       `json:"required,omitempty"`
+	Fields   []TypeDecl `json:"fields,omitempty"`
+	Items    *TypeDecl  `json:"items,omitempty"`
+}
 
 func DataType(data interface{}) string {
 	switch data.(type) {
@@ -33,13 +44,13 @@ type ErrorMessage struct {
 }
 
 type Result struct {
-	Errors []*ErrorMessage
+	Errors  []*ErrorMessage
+	Deletes []string
 }
 
-func validateData(level string, schema map[string]interface{}, data interface{}, r *Result) {
-	typeValue := schema["type"].(string)
-	required := schema["required"].(bool)
-	// log.Printf("当前 level 为 %s ，typeValue 为 %s ，required 为 %v \n", level, typeValue, required)
+func validateData(level string, typeDecl TypeDecl, data interface{}, r *Result) {
+	typeValue := typeDecl.Type
+	required := typeDecl.Required
 	if required && data == nil {
 		r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，不能为空"})
 	}
@@ -48,115 +59,155 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 		case "object":
 			objectData, ok := data.(map[string]interface{})
 			if !ok {
-				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 object 类型"})
+				if required {
+					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 object 类型"})
+				} else {
+					r.Deletes = append(r.Deletes, level)
+				}
 			} else {
-				propertiesMap := schema["properties"].(map[string]interface{})
-				for filedName, settings := range propertiesMap {
-					validateData(level+"/"+filedName, settings.(map[string]interface{}), objectData[filedName], r)
+				for _, fieldObj := range typeDecl.Fields {
+					validateData(level+"/"+fieldObj.Name, fieldObj, objectData[fieldObj.Name], r)
 				}
 			}
 		case "array":
 			objectData, ok := data.([]interface{})
 			if !ok {
-				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
+				if required {
+					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
+				} else {
+					r.Deletes = append(r.Deletes, level)
+				}
 			} else {
-				itemsMap := schema["items"].(map[string]interface{})
-				if itemsMap["type"] == "object" || itemsMap["type"] == "array" {
-					for index, value := range objectData {
-						validateData(level+"/"+strconv.Itoa(index), itemsMap, value, r)
-					}
+				for index, value := range objectData {
+					validateData(level+"/["+strconv.Itoa(index)+"]", *typeDecl.Items, value, r)
 				}
 			}
 		default:
-			if required {
-				dataType := DataType(data)
-				if dataType != typeValue {
+			dataType := DataType(data)
+			if dataType != typeValue {
+				if required {
 					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，期望类型是 " + typeValue + "，实际类型是 " + dataType})
+				} else {
+					r.Deletes = append(r.Deletes, level)
 				}
 			}
+
 		}
 	}
 }
 
 func TestSchemaValidate(t *testing.T) {
 
-	schema := H{
-		"type":     "object",
+	var schemaBytes = []byte(`{
+		"name": "test",
+		"type": "object",
 		"required": true,
-		"properties": H{
-			"#id": H{
-				"type":     "integer",
-				"required": true,
+		"fields": [
+			{
+				"name": "#id",
+				"type": "integer",
+				"required": true
 			},
-			"#person": H{
-				"type":     "object",
+			{
+				"name": "#person",
+				"type": "object",
 				"required": true,
-				"properties": H{
-					"#age": H{
-						"type":     "integer",
-						"required": true,
+				"fields": [
+					{
+						"name": "#age",
+						"type": "integer",
+						"required": true
 					},
-					"#name": H{
-						"type":     "string",
-						"required": true,
+					{
+						"name": "#name",
+						"type": "string",
+						"required": true
 					},
-				},
+					{
+						"name": "address",
+						"type": "string",
+						"required": false
+					}
+				]
 			},
-			"#friends": H{
-				"type":     "array",
+			{
+				"name": "#friends",
+				"type": "array",
 				"required": true,
-				"items": H{
-					"type":     "object",
+				"items": {
+					"type": "object",
 					"required": true,
-					"properties": H{
-						"#age": H{
-							"type":     "integer",
-							"required": true,
+					"fields": [
+						{
+							"name": "#age",
+							"type": "integer",
+							"required": true
 						},
-						"name": H{
-							"type":     "string",
-							"required": false,
-						},
-					},
-				},
+						{
+							"name": "name",
+							"type": "string",
+							"required": false
+						}
+					]
+				}
 			},
-			"#likes": H{
-				"type":     "array",
+			{
+				"name": "#likes",
+				"type": "array",
 				"required": true,
-				"items": H{
-					"type":     "string",
-					"required": false,
-				},
-			},
-		},
-	}
+				"items": {
+					"type": "string",
+					"required": false
+				}
+			}
+		]
+	}`)
 
-	value := map[string]interface{}{
+	var typeDecl = TypeDecl{}
+	json.Unmarshal(schemaBytes, &typeDecl)
+
+	var dataBytes = []byte(`{
 		"#id": 1,
-		"#person": H{
-			"#age":  1,
-			"#name": "1",
-			"other": 1,
-		},
-		"#friends": A{
-			H{"#age": 1, "name": "1", "other": 1},
-			H{"#age": 2, "name": "2", "other": "2"},
-		},
-		"#likes": A{
+		"#person": 1,
+		"#friends": [
+			{
+				"#age": 1,
+				"name": "1",
+				"other": 1
+			},
+			{
+				"#age": 2,
+				"name": "2",
+				"other": "2"
+			}
+		],
+		"#likes": [
 			"a",
 			"b",
-			1,
-		},
-		"other": 1,
-	}
+			1
+		],
+		"other": 1
+	}`)
+
+	value, _ := DecodeJsonBytes(dataBytes)
 
 	r := Result{
-		Errors: make([]*ErrorMessage, 0, 1),
+		Errors:  make([]*ErrorMessage, 0, 1),
+		Deletes: make([]string, 0, 1),
 	}
-	validateData("", schema, value, &r)
+
+	validateData("", typeDecl, value, &r)
 
 	for _, massage := range r.Errors {
-		log.Println(massage)
+		log.Println(*massage)
 	}
 
+	result := dataBytes
+	for _, del := range r.Deletes {
+		log.Println(del)
+		split := strings.Split(del, "/")[1:]
+		result = jsonparser.Delete(result, split...)
+	}
+
+	log.Println(string(result))
 }
