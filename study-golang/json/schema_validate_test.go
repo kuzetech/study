@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func DataType(data interface{}) string {
-	switch data.(type) {
+func DataType(data *interface{}) string {
+	switch (*data).(type) {
 	case uint, uint8, uint16, uint32, uint64,
 		int, int8, int16, int32, int64, uintptr:
 		return "integer"
@@ -40,14 +40,13 @@ func deleteItem(parentData *interface{}, dataFieldName string, dataArrayIndex in
 	if dataFieldName == "" {
 		pd := (*parentData).([]interface{})
 		pd = append(pd[:dataArrayIndex], pd[dataArrayIndex+1:]...)
-		*parentData = &pd
 	} else {
 		pd := (*parentData).(map[string]interface{})
 		delete(pd, dataFieldName)
 	}
 }
 
-func validateData(level string, schema map[string]interface{}, data interface{}, parentData *interface{}, dataFieldName string, dataArrayIndex int, r *Result) {
+func validateData(level string, schema map[string]interface{}, data *interface{}, parentData *interface{}, dataFieldName string, dataArrayIndex int, r *Result) {
 	typeValue := schema["type"].(string)
 	required := schema["required"].(bool)
 	// log.Printf("当前 level 为 %s ，typeValue 为 %s ，required 为 %v \n", level, typeValue, required)
@@ -57,7 +56,7 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 	if data != nil {
 		switch typeValue {
 		case "object":
-			objectData, ok := data.(map[string]interface{})
+			objectDataMap, ok := (*data).(map[string]interface{})
 			if !ok {
 				if required {
 					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 object 类型"})
@@ -66,12 +65,13 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 				}
 			} else {
 				propertiesMap := schema["properties"].(map[string]interface{})
-				for filedName, settings := range propertiesMap {
-					validateData(level+"/"+filedName, settings.(map[string]interface{}), objectData[filedName], &data, filedName, 0, r)
+				for filedName, subSchema := range propertiesMap {
+					fieldData := objectDataMap[filedName]
+					validateData(level+"/"+filedName, subSchema.(map[string]interface{}), &fieldData, data, filedName, 0, r)
 				}
 			}
 		case "array":
-			objectData, ok := data.([]interface{})
+			objectData, ok := (*data).([]interface{})
 			if !ok {
 				if required {
 					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
@@ -81,7 +81,7 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 			} else {
 				itemsMap := schema["items"].(map[string]interface{})
 				for index, value := range objectData {
-					validateData(level+"/"+strconv.Itoa(index), itemsMap, value, &data, "", index, r)
+					validateData(level+"/"+strconv.Itoa(index), itemsMap, &value, data, "", index, r)
 				}
 			}
 		default:
@@ -201,7 +201,9 @@ func TestSchemaValidate(t *testing.T) {
 		Errors: make([]*ErrorMessage, 0, 1),
 	}
 
-	validateData("", schema, value, nil, "", 0, &r)
+	var bbb interface{} = value
+
+	validateData("", schema, &bbb, nil, "", 0, &r)
 
 	for _, massage := range r.Errors {
 		log.Println(massage)
