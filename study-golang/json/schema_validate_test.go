@@ -168,7 +168,12 @@ func TestSchemaValidate(t *testing.T) {
 
 	var dataBytes = []byte(`{
 		"#id": 1,
-		"#person": 1,
+		"#person": {
+			"#age": 1,
+			"#name": "1",
+			"address": 1,
+			"other": 1
+		},
 		"#friends": [
 			{
 				"#age": 1,
