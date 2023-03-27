@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func DataType(data *interface{}) string {
-	switch (*data).(type) {
+func DataType(data interface{}) string {
+	switch data.(type) {
 	case uint, uint8, uint16, uint32, uint64,
 		int, int8, int16, int32, int64, uintptr:
 		return "integer"
@@ -36,17 +36,7 @@ type Result struct {
 	Errors []*ErrorMessage
 }
 
-func deleteItem(parentData *interface{}, dataFieldName string, dataArrayIndex int) {
-	if dataFieldName == "" {
-		pd := (*parentData).([]interface{})
-		pd = append(pd[:dataArrayIndex], pd[dataArrayIndex+1:]...)
-	} else {
-		pd := (*parentData).(map[string]interface{})
-		delete(pd, dataFieldName)
-	}
-}
-
-func validateData(level string, schema map[string]interface{}, data *interface{}, parentData *interface{}, dataFieldName string, dataArrayIndex int, r *Result) {
+func validateData(level string, schema map[string]interface{}, data interface{}, r *Result) {
 	typeValue := schema["type"].(string)
 	required := schema["required"].(bool)
 	// log.Printf("当前 level 为 %s ，typeValue 为 %s ，required 为 %v \n", level, typeValue, required)
@@ -56,41 +46,32 @@ func validateData(level string, schema map[string]interface{}, data *interface{}
 	if data != nil {
 		switch typeValue {
 		case "object":
-			objectDataMap, ok := (*data).(map[string]interface{})
+			objectData, ok := data.(map[string]interface{})
 			if !ok {
-				if required {
-					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 object 类型"})
-				} else {
-					deleteItem(parentData, dataFieldName, dataArrayIndex)
-				}
+				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，不能为空"})
 			} else {
 				propertiesMap := schema["properties"].(map[string]interface{})
-				for filedName, subSchema := range propertiesMap {
-					fieldData := objectDataMap[filedName]
-					validateData(level+"/"+filedName, subSchema.(map[string]interface{}), &fieldData, data, filedName, 0, r)
+				for filedName, settings := range propertiesMap {
+					validateData(level+"/"+filedName, settings.(map[string]interface{}), objectData[filedName], r)
 				}
 			}
 		case "array":
-			objectData, ok := (*data).([]interface{})
+			objectData, ok := data.([]interface{})
 			if !ok {
-				if required {
-					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
-				} else {
-					deleteItem(parentData, dataFieldName, dataArrayIndex)
-				}
+				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 array 类型"})
 			} else {
 				itemsMap := schema["items"].(map[string]interface{})
-				for index, value := range objectData {
-					validateData(level+"/"+strconv.Itoa(index), itemsMap, &value, data, "", index, r)
+				if itemsMap["type"] == "object" || itemsMap["type"] == "array" {
+					for index, value := range objectData {
+						validateData(level+"/"+strconv.Itoa(index), itemsMap, value, r)
+					}
 				}
 			}
 		default:
-			dataType := DataType(data)
-			if dataType != typeValue {
-				if required {
+			if required {
+				dataType := DataType(data)
+				if dataType != typeValue {
 					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，期望类型是 " + typeValue + "，实际类型是 " + dataType})
-				} else {
-					deleteItem(parentData, dataFieldName, dataArrayIndex)
 				}
 			}
 		}
@@ -119,10 +100,6 @@ func TestSchemaValidate(t *testing.T) {
 						"type":     "string",
 						"required": true,
 					},
-					"address": H{
-						"type":     "string",
-						"required": false,
-					},
 				},
 			},
 			"#friends": H{
@@ -148,24 +125,7 @@ func TestSchemaValidate(t *testing.T) {
 				"type":     "array",
 				"required": true,
 				"items": H{
-					"type":     "string",
-					"required": false,
-				},
-			},
-			"test": H{
-				"type":     "array",
-				"required": false,
-				"items": H{
-					"type":     "string",
-					"required": false,
-				},
-			},
-			"#test2": H{
-				"type":     "array",
-				"required": true,
-				"items": H{
-					"type":     "string",
-					"required": false,
+					"type": "string",
 				},
 			},
 		},
@@ -174,10 +134,9 @@ func TestSchemaValidate(t *testing.T) {
 	value := map[string]interface{}{
 		"#id": 1,
 		"#person": H{
-			"#age":    1,
-			"#name":   "1",
-			"address": 1,
-			"other":   1,
+			"#age":  1,
+			"#name": "1",
+			"other": 1,
 		},
 		"#friends": A{
 			H{"#age": 1, "name": "1", "other": 1},
@@ -188,26 +147,16 @@ func TestSchemaValidate(t *testing.T) {
 			"b",
 			1,
 		},
-		"test": "a",
-		"#test2": A{
-			"c",
-			"d",
-			1,
-		},
 		"other": 1,
 	}
 
 	r := Result{
 		Errors: make([]*ErrorMessage, 0, 1),
 	}
-
-	var bbb interface{} = value
-
-	validateData("", schema, &bbb, nil, "", 0, &r)
+	validateData("", schema, value, &r)
 
 	for _, massage := range r.Errors {
 		log.Println(massage)
 	}
 
-	log.Println(value)
 }
