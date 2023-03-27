@@ -48,7 +48,7 @@ func validateData(level string, schema map[string]interface{}, data interface{},
 		case "object":
 			objectData, ok := data.(map[string]interface{})
 			if !ok {
-				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，不能为空"})
+				r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 必须是 object 类型"})
 			} else {
 				propertiesMap := schema["properties"].(map[string]interface{})
 				for filedName, settings := range propertiesMap {
