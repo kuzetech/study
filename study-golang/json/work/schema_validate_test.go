@@ -3,6 +3,7 @@ package work
 import (
 	"encoding/json"
 	"github.com/buger/jsonparser"
+	"github.com/stretchr/testify/require"
 	"go/types"
 	"log"
 	"strconv"
@@ -99,6 +100,8 @@ func validateData(level string, typeDecl TypeDecl, data interface{}, r *Result) 
 
 func TestSchemaValidate(t *testing.T) {
 
+	assertions := require.New(t)
+
 	var schemaBytes = []byte(`{
 		"name": "test",
 		"type": "object",
@@ -165,7 +168,8 @@ func TestSchemaValidate(t *testing.T) {
 	}`)
 
 	var typeDecl = TypeDecl{}
-	json.Unmarshal(schemaBytes, &typeDecl)
+	err := json.Unmarshal(schemaBytes, &typeDecl)
+	assertions.Nil(err)
 
 	var dataBytes = []byte(`{
 		"#id": 1,
@@ -195,7 +199,8 @@ func TestSchemaValidate(t *testing.T) {
 		"other": 1
 	}`)
 
-	value, _ := json2.DecodeJsonBytes(dataBytes)
+	value, err := json2.DecodeJsonBytes(dataBytes)
+	assertions.Nil(err)
 
 	r := Result{
 		Errors:  make([]*ErrorMessage, 0, 1),
