@@ -29,9 +29,13 @@ func buildObjectProjector(properties map[string]interface{}) projector {
 		projectors[field] = buildProjector(schema.(map[string]interface{}))
 	}
 	return func(v interface{}) interface{} {
+		m := v.(map[string]interface{})
 		obj := map[string]interface{}{}
 		for f, p := range projectors {
-			obj[f] = p(v.(map[string]interface{})[f])
+			i, ok := m[f]
+			if ok {
+				obj[f] = p(i)
+			}
 		}
 		return obj
 	}
@@ -59,39 +63,31 @@ func TestProjection(t *testing.T) {
 		"properties": H{
 			"#id": H{
 				"type": "number",
-				"pre":  true,
 			},
 			"#person": H{
 				"type": "object",
-				"pre":  true,
 				"properties": H{
 					"age": H{
 						"type": "number",
-						"pre":  false,
 					},
 				},
 			},
 			"#friends": H{
 				"type": "array",
-				"pre":  true,
 				"items": H{
 					"type": "object",
 					"properties": H{
 						"age": H{
 							"type": "number",
-							"pre":  false,
 						},
 						"name": H{
 							"type": "string",
-							"pre":  false,
 						},
 					},
 				},
 			},
 			"likes": H{
 				"type": "array",
-				"pre":  false,
-				"drop": true,
 				"items": H{
 					"type": "string",
 				},
