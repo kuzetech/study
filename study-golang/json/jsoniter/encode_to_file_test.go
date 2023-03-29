@@ -1,4 +1,4 @@
-package json
+package jsoniter
 
 import (
 	jsoniter "github.com/json-iterator/go"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_encode(t *testing.T) {
+func Test_encode_to_file(t *testing.T) {
 	fastApi := jsoniter.ConfigFastest
 
 	person := &Person{
@@ -15,7 +15,7 @@ func Test_encode(t *testing.T) {
 		FullName: "FullName",
 	}
 
-	file, err := os.Create("./encode.json")
+	file, err := os.Create("./data-person.json")
 	if err != nil {
 		t.Fatal(err)
 	}

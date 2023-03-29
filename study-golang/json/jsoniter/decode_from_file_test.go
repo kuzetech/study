@@ -1,4 +1,4 @@
-package json
+package jsoniter
 
 import (
 	jsoniter "github.com/json-iterator/go"
@@ -9,7 +9,7 @@ import (
 func Test_decode(t *testing.T) {
 	fastApi := jsoniter.ConfigFastest
 
-	file, err := os.Open("./data.json")
+	file, err := os.Open("./data-person.json")
 	if err != nil {
 		t.Fatal(err)
 	}

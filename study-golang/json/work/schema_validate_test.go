@@ -1,4 +1,4 @@
-package json
+package work
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	json2 "techkuze.com/bigdata/study/study-golang/json"
 	"testing"
 )
 
@@ -194,7 +195,7 @@ func TestSchemaValidate(t *testing.T) {
 		"other": 1
 	}`)
 
-	value, _ := DecodeJsonBytes(dataBytes)
+	value, _ := json2.DecodeJsonBytes(dataBytes)
 
 	r := Result{
 		Errors:  make([]*ErrorMessage, 0, 1),

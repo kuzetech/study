@@ -1,10 +1,11 @@
-package json
+package jsoniter
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/qri-io/jsonschema"
 	"github.com/stretchr/testify/require"
+	json2 "techkuze.com/bigdata/study/study-golang/json"
 	"testing"
 )
 
@@ -21,7 +22,7 @@ func TestMap(t *testing.T) {
 	should := require.New(t)
 
 	var m map[string]interface{}
-	err := NumberEncoding.Unmarshal(contentBytes2, &m)
+	err := json2.NumberEncoding.Unmarshal(contentBytes2, &m)
 	should.Nil(err)
 
 	schema := &jsonschema.Schema{}

@@ -18,7 +18,7 @@ func recursionKeys(contentBytes []byte, upLevel string) {
 	})
 }
 
-func Test_object_foreach(t *testing.T) {
+func Test_traverse_object_fields(t *testing.T) {
 	contentBytes, err := ioutil.ReadFile("./data.json")
 	if err != nil {
 		t.Fatal(err)

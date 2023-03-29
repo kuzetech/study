@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_specified_key(t *testing.T) {
+func Test_read_specified_keys(t *testing.T) {
 	contentBytes, err := ioutil.ReadFile("./data.json")
 	if err != nil {
 		t.Fatal(err)

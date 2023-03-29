@@ -1,4 +1,4 @@
-package json
+package jsoniter
 
 import (
 	jsoniter "github.com/json-iterator/go"
@@ -6,13 +6,7 @@ import (
 	"testing"
 )
 
-type Person struct {
-	First    string `json:"first"`
-	Last     string `json:"last"`
-	FullName string `json:"fullName"`
-}
-
-func Test_base(t *testing.T) {
+func Test_unmarshal_bytes(t *testing.T) {
 	// The default performance is already several times faster than the standard library
 	// 如果直接使用 jsoniter.Marshal() 就使用的这一配置
 	// defaultApi := jsoniter.ConfigDefault

@@ -1,4 +1,4 @@
-package json
+package work
 
 import (
 	"github.com/stretchr/testify/assert"

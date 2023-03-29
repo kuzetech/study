@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test_loader_reference(t *testing.T) {
+func Test_file_reference(t *testing.T) {
 	schemaLoader := gojsonschema.NewReferenceLoader("file://./schema.json")
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {

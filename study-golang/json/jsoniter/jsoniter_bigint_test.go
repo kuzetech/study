@@ -1,10 +1,11 @@
-package json
+package jsoniter
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"log"
+	json2 "techkuze.com/bigdata/study/study-golang/json"
 	"testing"
 )
 
@@ -19,7 +20,7 @@ func TestBigIntDecodeUseFloat(t *testing.T) {
 	var result interface{}
 	// ConfigFastest marshals float with only 6 digits precision
 	// will lose precession
-	FloatEncoding.Unmarshal(contentBytes, &result)
+	json2.FloatEncoding.Unmarshal(contentBytes, &result)
 
 	// map[count:1.621071533109678e+18 name:test]
 	// 这里 count 字段明显是 float64 类型，已经丢失精度
@@ -29,7 +30,7 @@ func TestBigIntDecodeUseFloat(t *testing.T) {
 func TestBigIntDecodeUseNumber(t *testing.T) {
 	var result interface{}
 	// readNumberAsString
-	NumberEncoding.Unmarshal(contentBytes, &result)
+	json2.NumberEncoding.Unmarshal(contentBytes, &result)
 
 	// map[count:1621071533109678080123456 name:test]
 	// 这里 count 字段实际类型为 json.Number，是 string 的别名
@@ -53,7 +54,7 @@ func TestBigIntDecodeUseNumber(t *testing.T) {
 func TestBigIntDecodeUseNumberToObject(t *testing.T) {
 	var msg Message
 	// readNumberAsString
-	err := NumberEncoding.Unmarshal(contentBytes, &msg)
+	err := json2.NumberEncoding.Unmarshal(contentBytes, &msg)
 
 	// 如果我直接反序列化到对象中，count 字段将超过 int64 的接收范围，这时候将报错
 	if err != nil {
@@ -70,7 +71,7 @@ func TestBigIntDecodeConvertUseNumberToObject(t *testing.T) {
 
 	// 尝试将 json.Number 转换成 int64 范围
 	// 如果出错将转换成 float64 ，会丢失精度
-	data, err := DecodeJsonBytes(contentBytes)
+	data, err := json2.DecodeJsonBytes(contentBytes)
 	should.Nil(err)
 
 	// map[count:1.621071533109678e+24 name:test]
