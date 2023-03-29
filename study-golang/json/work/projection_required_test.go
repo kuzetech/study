@@ -65,8 +65,54 @@ func TestProjection2(t *testing.T) {
 		"type": "object",
 		"required": true,
 		"fields": [
-
-			
+			{
+				"name": "#id",
+				"type": "integer",
+				"required": true
+			},
+			{
+				"name": "#person",
+				"type": "object",
+				"required": true,
+				"fields": [
+					{
+						"name": "#age",
+						"type": "integer",
+						"required": true
+					},
+					{
+						"name": "#name",
+						"type": "string",
+						"required": true
+					},
+					{
+						"name": "address",
+						"type": "string",
+						"required": false
+					}
+				]
+			},
+			{
+				"name": "#friends",
+				"type": "array",
+				"required": true,
+				"items": {
+					"type": "object",
+					"required": true,
+					"fields": [
+						{
+							"name": "#age",
+							"type": "integer",
+							"required": true
+						},
+						{
+							"name": "name",
+							"type": "string",
+							"required": false
+						}
+					]
+				}
+			},
 			{
 				"name": "#likes",
 				"type": "array",
