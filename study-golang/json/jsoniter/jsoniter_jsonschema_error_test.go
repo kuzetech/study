@@ -18,7 +18,7 @@ var contentSchema = []byte(`{
 	}
 }`)
 
-func TestMap(t *testing.T) {
+func Test_error(t *testing.T) {
 	should := require.New(t)
 
 	var m map[string]interface{}
