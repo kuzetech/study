@@ -39,8 +39,7 @@ func Test_LimitReader(t *testing.T) {
 		all, err := ioutil.ReadAll(buffer)
 		assertions.Nil(err)
 		log.Println(string(all))
-
-		buffer.
+		
 	}
 
 }
