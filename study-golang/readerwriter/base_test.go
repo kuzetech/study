@@ -39,7 +39,7 @@ func Test_LimitReader(t *testing.T) {
 		all, err := ioutil.ReadAll(buffer)
 		assertions.Nil(err)
 		log.Println(string(all))
-		
+
 	}
 
 }
@@ -58,4 +58,29 @@ func Test_reader(t *testing.T) {
 
 	log.Println(bodyBytes)
 
+}
+
+func Test_read_all_limit(t *testing.T) {
+	assertions := require.New(t)
+
+	var bodyBytes []byte = []byte(`{"t":"d"}`)
+
+	buffer := bytes.NewBuffer(bodyBytes)
+
+	// 比最长的限制多一位
+	reader := io.LimitReader(buffer, int64(len(bodyBytes)+1))
+
+	// 读取出所有数据
+	all, err := ioutil.ReadAll(reader)
+	assertions.Nil(err)
+	limitReader := reader.(*io.LimitedReader)
+	log.Println(string(all))
+	log.Println(limitReader.N)
+
+	// 全部读出后继续读取，也不会报错，因为底层是 buffer
+	all2, err := ioutil.ReadAll(reader)
+	log.Println(err)
+	log.Println(string(all2))
+
+	log.Println(len(all))
 }
