@@ -1,5 +1,0 @@
-/.vscode/
-/.terraform
-/*.tfstate*
-/.logs/
-/deploy/scripts/.tmp/
