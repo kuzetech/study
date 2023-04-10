@@ -1,6 +1,7 @@
 package time
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -24,5 +25,10 @@ func Test_parseIn_location(t *testing.T) {
 	assertions.Nil(err)
 
 	assertions.Equal(int64(1679648520), result.Unix())
+}
 
+func Test_truncate(t *testing.T) {
+
+	now := time.Now()
+	fmt.Println(now.Truncate(time.Minute * 5))
 }
