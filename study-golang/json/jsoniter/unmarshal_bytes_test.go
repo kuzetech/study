@@ -2,7 +2,9 @@ package jsoniter
 
 import (
 	jsoniter "github.com/json-iterator/go"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
+	"log"
 	"testing"
 )
 
@@ -30,5 +32,22 @@ func Test_unmarshal_bytes(t *testing.T) {
 	}
 
 	t.Log(person.Last)
+}
 
+func Test_unmarshal_bytes_Standard(t *testing.T) {
+	assertions := require.New(t)
+	var dataBytes = []byte(`{"#id": 1.01}`)
+	var value map[string]interface{}
+	err := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(dataBytes, &value)
+	assertions.Nil(err)
+	log.Println(value)
+}
+
+func Test_unmarshal_bytes_default(t *testing.T) {
+	assertions := require.New(t)
+	var dataBytes = []byte(`{"#id": 1}`)
+	var value map[string]interface{}
+	err := jsoniter.ConfigDefault.Unmarshal(dataBytes, &value)
+	assertions.Nil(err)
+	log.Println(value)
 }

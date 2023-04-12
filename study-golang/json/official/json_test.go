@@ -3,6 +3,7 @@ package official
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"log"
 	"testing"
 )
@@ -44,4 +45,16 @@ func Test_json(t *testing.T) {
 	fmt.Println("反序列化的结果如下：")
 	log.Println(d)
 
+}
+
+func Test_unmarshal_bytes_default(t *testing.T) {
+	assertions := require.New(t)
+	var dataBytes = []byte(`{"#id": 10.01}`)
+	var value map[string]interface{}
+	err := json.Unmarshal(dataBytes, &value)
+	assertions.Nil(err)
+	log.Println(value)
+	bytes, err := json.Marshal(value)
+	assertions.Nil(err)
+	log.Println(string(bytes))
 }
