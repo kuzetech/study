@@ -1,5 +1,7 @@
 package windowFunnel
 
+// Event
+// index 1=A事件 ，2=B事件 以此类推
 type Event struct {
 	time  int64
 	index int64
@@ -18,6 +20,7 @@ func (e *EventsTimestamp) hasValue() bool {
 	}
 }
 
+// 仿 clickhouse 实现
 func test(data []Event, len int64, window int64) []EventsTimestamp {
 	var eventsTimestamp = make([]EventsTimestamp, len)
 	var currentArrayIndex int64 = 0
@@ -57,44 +60,9 @@ func findEventArray(data []Event, eventIndex int64) []int {
 	return result
 }
 
+// 自己实现的新算法
 // data 是已经排序好的 按时间升序的数组，length 是查找序列的长度，window 是窗口期
 func test2(data []Event, length int64, window int64) []EventsTimestamp {
-	for i := length; i > 0; i-- {
-		eventIndexArray := findEventArray(data, i)
-		if len(eventIndexArray) == 0 {
-			continue
-		}
-
-		for _, eventIndex := range eventIndexArray {
-			var eventsTimestamp = make([]EventsTimestamp, i)
-			lastEvent := data[eventIndex]
-			eventsTimestamp[i-1].time = lastEvent.time
-			eventsTimestamp[i-1].index = eventIndex + 1
-
-			if i-1 == 0 {
-				return eventsTimestamp
-			}
-
-			var currentEventIndex = i - 1
-			sliceData := data[:eventIndex]
-			for s := eventIndex - 1; s >= 0; s-- {
-				event := sliceData[s]
-				var timeMatch = window >= eventsTimestamp[i-1].time-event.time
-				if event.index == currentEventIndex && timeMatch {
-					eventsTimestamp[currentEventIndex-1].time = event.time
-					eventsTimestamp[currentEventIndex-1].index = s + 1
-					currentEventIndex = currentEventIndex - 1
-					if currentEventIndex < 1 {
-						return eventsTimestamp
-					}
-				}
-			}
-		}
-	}
-	return make([]EventsTimestamp, 0)
-}
-
-func test3(data []Event, length int64, window int64) []EventsTimestamp {
 	for i := length; i > 0; i-- {
 		eventIndexArray := findEventArray(data, i)
 		if len(eventIndexArray) == 0 {
