@@ -1,0 +1,51 @@
+logging.level: error
+monitoring:
+  enabled: true
+  elasticsearch:
+    hosts: ["elasticsearch:9200"]
+processors:
+  - include_fields:
+      fields: ["fields","message"]
+
+filebeat.inputs:
+- type: kafka
+  hosts:
+    - s6.biubiubiu.io:9092
+  topics: ["sausage_develop.raw.unet"]
+  group_id: "filebeat"
+  fields:
+    es_index_pre: dev-unet
+- type: kafka
+  hosts:
+    - s6.biubiubiu.io:9092
+  topics: ["sausage_develop.raw.client"]
+  group_id: "filebeat"
+  fields:
+    es_index_pre: dev-client
+- type: kafka
+  hosts:
+    - s6.biubiubiu.io:9092
+  topics: ["sausage_develop.raw.gameserver.stat"]
+  group_id: "filebeat"
+  fields:
+    es_index_pre: dev-gameserver
+- type: kafka
+  hosts:
+    - s6.biubiubiu.io:9092
+  topics: ["sausage_develop.validate_result"]
+  group_id: "filebeat"
+  fields:
+    es_index_pre: dev-validate
+- type: kafka
+  hosts:
+    - s6.biubiubiu.io:9092
+  topics: ["sausage_release.validate_result"]
+  group_id: "filebeat"
+  fields:
+    es_index_pre: res-validate
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  pipeline: kafka_jsonstr_formats
+  indices:
+    - index: 'sausage-%{[fields.es_index_pre]}-%{+yyyy.MM.dd}'

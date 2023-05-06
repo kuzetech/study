@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  master:
+    image: alluxio/alluxio:2.8.1
+    container_name: master
+    hostname: master
+    command: master
+    environment:
+      - ALLUXIO_JAVA_OPTS=-Dalluxio.master.hostname=master -Dalluxio.master.mount.table.root.ufs=/opt/alluxio/underFSStorage -Dalluxio.security.authorization.permission.enabled=false
+    volumes:
+      - ./alluxio_ufs:/opt/alluxio/underFSStorage
+    ports:
+      - 19998:19998  # 客户端和workers，与Master RPC进程进行通信
+      - 19999:19999  # master web UI
+      
+
+  worker:
+    image: alluxio/alluxio:2.8.1
+    container_name: worker
+    hostname: worker
+    command: worker
+    environment:
+      - ALLUXIO_JAVA_OPTS=-Dalluxio.worker.ramdisk.size=64M -Dalluxio.master.hostname=master -Dalluxio.worker.hostname=worker
+    volumes:
+      - ./alluxio_ufs:/opt/alluxio/underFSStorage
+    ports:
+      - 29999:29999  # 客户端与Worker RPC进程进行通信
+      - 30000:30000  # worker Web UI
