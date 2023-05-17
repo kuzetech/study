@@ -32,3 +32,19 @@ func Test_truncate(t *testing.T) {
 	now := time.Now()
 	fmt.Println(now.Truncate(time.Minute * 5))
 }
+
+func Test_format(t *testing.T) {
+	assertions := require.New(t)
+
+	layout := "2006-01-02 15:04:05.999"
+
+	dataStr := "2023-03-24 17:02:00.000"
+
+	location, err := time.LoadLocation("Local")
+	assertions.Nil(err)
+
+	result, err := time.ParseInLocation(layout, dataStr, location)
+	assertions.Nil(err)
+
+	assertions.Equal(int64(1679648520), result.Unix())
+}
