@@ -26,10 +26,6 @@ func DecodeJsonBytes(b []byte) (interface{}, error) {
 	return convertNumbers(decoded), nil
 }
 
-func DecodeJsonString(s string) (interface{}, error) {
-	return DecodeJsonBytes([]byte(s))
-}
-
 func convertNumbers(v interface{}) interface{} {
 	switch vv := v.(type) {
 	case []interface{}:
