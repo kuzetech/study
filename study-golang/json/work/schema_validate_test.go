@@ -3,6 +3,7 @@ package work
 import (
 	"encoding/json"
 	"github.com/buger/jsonparser"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/require"
 	"go/types"
 	"log"
@@ -35,6 +36,8 @@ func DataType(data interface{}) string {
 		return "array"
 	case types.Map, types.Struct:
 		return "object"
+	case json.Number:
+		return "JsonNumber"
 	default:
 		return "unknown"
 	}
@@ -86,14 +89,44 @@ func validateData(level string, typeDecl TypeDecl, data interface{}, r *Result) 
 			}
 		default:
 			dataType := DataType(data)
-			if dataType != typeValue {
+			match, errorMsg := compareDataType(data, dataType, typeValue)
+			if !match {
 				if required {
-					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，期望类型是 " + typeValue + "，实际类型是 " + dataType})
+					r.Errors = append(r.Errors, &ErrorMessage{PropertyPath: level, Message: level + " 是预置属性，" + errorMsg})
 				} else {
+					log.Println(level + " 是非预置属性，" + errorMsg)
 					r.Deletes = append(r.Deletes, level)
 				}
 			}
+		}
+	}
+}
 
+func compareDataType(data interface{}, dataType string, destType string) (bool, string) {
+	if dataType != "JsonNumber" {
+		if dataType != destType {
+			return false, "期望类型是 " + destType + "，实际类型是 " + dataType
+		} else {
+			return true, ""
+		}
+	} else {
+		dataNumber := data.(json.Number)
+		if destType == "integer" {
+			_, err := dataNumber.Int64()
+			if err != nil {
+				return false, "转换为 Int64 错误：" + err.Error()
+			} else {
+				return true, ""
+			}
+		} else if destType == "float" {
+			_, err := dataNumber.Float64()
+			if err != nil {
+				return false, "转换为 Float64 错误：" + err.Error()
+			} else {
+				return true, ""
+			}
+		} else {
+			return false, "数组类型仅能转换为 Int64 或 Float64"
 		}
 	}
 }
@@ -199,7 +232,8 @@ func TestSchemaValidate(t *testing.T) {
 		"other": 1
 	}`)
 
-	value, err := json2.DecodeJsonBytes(dataBytes)
+	var value interface{}
+	err = json2.NumberEncoding.Unmarshal(dataBytes, &value)
 	assertions.Nil(err)
 
 	r := Result{
@@ -209,11 +243,13 @@ func TestSchemaValidate(t *testing.T) {
 
 	validateData("", typeDecl, value, &r)
 
+	log.Println("--------------- error --------------------")
 	for _, massage := range r.Errors {
 		log.Println(*massage)
 	}
 
 	result := dataBytes
+	log.Println("--------------- delete --------------------")
 	for _, del := range r.Deletes {
 		log.Println(del)
 		split := strings.Split(del, "/")[1:]
@@ -221,4 +257,8 @@ func TestSchemaValidate(t *testing.T) {
 	}
 
 	log.Println(string(result))
+
+	vv, err := jsoniter.Marshal(value)
+	assertions.Nil(err)
+	log.Println(string(vv))
 }
