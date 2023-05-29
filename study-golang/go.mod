@@ -25,6 +25,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/gocarina/gocsv v0.0.0-20230513223533-9ddd7fd60602 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
