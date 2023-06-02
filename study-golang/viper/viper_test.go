@@ -21,6 +21,9 @@ func Test_viper(t *testing.T) {
 	v.AddConfigPath("./a")
 	v.AddConfigPath("./b")
 
+	// 直接制定配置文件路径
+	// v.SetConfigFile("/a/b/test.yaml")
+
 	// Find and read the config file
 	err := v.ReadInConfig()
 
@@ -41,6 +44,7 @@ func Test_viper(t *testing.T) {
 	// 监听配置文件的变更
 	v.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("abs path Config file changed:", e.Name)
+		// 获取到的时候更新后的值
 		fmt.Println(v.GetString("test"))
 	})
 	v.WatchConfig()
