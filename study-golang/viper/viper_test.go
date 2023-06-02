@@ -3,7 +3,6 @@ package viper
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	"strings"
 	"testing"
 )
 import "github.com/spf13/viper"
@@ -11,10 +10,11 @@ import "github.com/spf13/viper"
 func Test_viper(t *testing.T) {
 	v := viper.New()
 
-	// 查找名为 test.yaml 的配置文件
+	// 查找名为 test 的配置文件，不包含扩展名
 	v.SetConfigName("test")
+
+	// 如果文件没有扩展名，就以 yaml 的形式读取
 	v.SetConfigType("yaml")
-	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 
 	// 在多个目录下查找 test.yaml 的配置文件
 	// 多个路径的情况下，读取找到的第一个文件
@@ -40,7 +40,7 @@ func Test_viper(t *testing.T) {
 
 	// 监听配置文件的变更
 	v.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("Config file changed:", e.Name)
+		fmt.Println("abs path Config file changed:", e.Name)
 		fmt.Println(v.GetString("test"))
 	})
 	v.WatchConfig()

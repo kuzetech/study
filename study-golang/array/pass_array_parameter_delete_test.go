@@ -6,7 +6,7 @@ import (
 )
 
 // 形参
-func deleteItem1(data []interface{}, index int) {
+func deleteItem21(data []int64, index int) {
 	data = append(data[:index], data[index+1:]...)
 }
 

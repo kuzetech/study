@@ -16,6 +16,7 @@ require (
 )
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.21.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
