@@ -1,4 +1,4 @@
-package readerwriter
+package file
 
 import (
 	"bytes"
