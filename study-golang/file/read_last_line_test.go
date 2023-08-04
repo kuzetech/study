@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -51,4 +52,40 @@ func Test_read_last_line(t *testing.T) {
 
 	fmt.Println(result)
 
+}
+
+func Test_seek_log3(t *testing.T) {
+	assertions := require.New(t)
+
+	file, err := os.Open("/Users/huangsw/code/study/study-golang/file/files/2023-08-04.3.log")
+	assertions.Nil(err)
+
+	defer file.Close()
+
+	_, err = file.Seek(6238, 0)
+	assertions.Nil(err)
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	line := scanner.Text()
+
+	fmt.Println(line)
+}
+
+func Test_seek_log2(t *testing.T) {
+	assertions := require.New(t)
+
+	file, err := os.Open("/Users/huangsw/code/study/study-golang/file/files/2023-08-04.2.log")
+	assertions.Nil(err)
+
+	defer file.Close()
+
+	_, err = file.Seek(11286643, 0)
+	assertions.Nil(err)
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	line := scanner.Text()
+
+	fmt.Println(line)
 }
