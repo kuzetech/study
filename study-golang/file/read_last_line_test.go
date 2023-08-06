@@ -57,12 +57,12 @@ func Test_read_last_line(t *testing.T) {
 func Test_seek_log3(t *testing.T) {
 	assertions := require.New(t)
 
-	file, err := os.Open("/Users/huangsw/code/study/study-golang/file/files/2023-08-04.3.log")
+	file, err := os.Open("./files/2023-08-04.3.log")
 	assertions.Nil(err)
 
 	defer file.Close()
 
-	_, err = file.Seek(6238, 0)
+	_, err = file.Seek(6312, 0)
 	assertions.Nil(err)
 
 	scanner := bufio.NewScanner(file)
@@ -75,7 +75,7 @@ func Test_seek_log3(t *testing.T) {
 func Test_seek_log2(t *testing.T) {
 	assertions := require.New(t)
 
-	file, err := os.Open("/Users/huangsw/code/study/study-golang/file/files/2023-08-04.2.log")
+	file, err := os.Open("./files/2023-08-04.2.log")
 	assertions.Nil(err)
 
 	defer file.Close()

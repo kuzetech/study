@@ -13,7 +13,6 @@ func init() {
 	file.Write([]byte("\n"))
 	file.Write([]byte("1111\n"))
 	file.Write([]byte("2222\n"))
-	file.Write([]byte("3333"))
 	file.Close()
 }
 
@@ -27,8 +26,14 @@ func Test_read(t *testing.T) {
 			// 删除输出 '\n'
 			// log.Println("读取到的内容为：" + string(lineBytes[:(len(lineBytes)-1)]))
 			log.Println("读取到的内容为：" + string(lineBytes))
+			if terr != nil {
+				log.Println("错误为：" + terr.Error())
+			}
 		} else {
 			log.Println("没有内容")
+			if terr != nil {
+				log.Println("错误为：" + terr.Error())
+			}
 		}
 		if terr == io.EOF {
 			break
