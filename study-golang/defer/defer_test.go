@@ -3,6 +3,7 @@ package _defer
 import (
 	"errors"
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -37,4 +38,7 @@ func Test_defer(t *testing.T) {
 	fmt.Println(test2())
 	fmt.Println(test3())
 	fmt.Println(test4())
+
+	log.Printf("11111")
+	log.Printf("22222")
 }
