@@ -2,14 +2,14 @@ package main
 
 import (
 	"log"
-	"techkuze.com/bigdata/study/study-golang/file"
 )
 
 func main() {
-	path, err := file.FindInodePath(493098715)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	log.Println(path)
+	var m = make(map[interface{}]interface{})
+
+	m[1] = 1
+	m["a"] = "a"
+
+	log.Println("test", m)
 }
